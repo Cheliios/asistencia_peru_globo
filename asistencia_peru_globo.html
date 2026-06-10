@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Perú Globo — Registro de Asistencia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+  :root {
+    --bg: #5a1a7a;
+    --bg2: #6d2191;
+    --surface: #ffffff;
+    --border: rgba(255,255,255,0.2);
+    --accent: #f9c22b;
+    --accent2: #e63946;
+    --success: #22c55e;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    --text-dark: #2d1040;
+    --text-light: #ffffff;
+    --muted: rgba(255,255,255,0.65);
+    --radius: 16px;
+    --card-bg: rgba(255,255,255,0.07);
+    --card-border: rgba(255,255,255,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, #5a1a7a 0%, #7b2fa3 50%, #4a1265 100%);
+    color: var(--text-light);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+
+  /* Burbujas decorativas de fondo */
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::before {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(249,194,43,0.12) 0%, transparent 70%);
+    top: -80px; right: -80px;
+  }
+  body::after {
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(230,57,70,0.1) 0%, transparent 70%);
+    bottom: -60px; left: -60px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 24px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---- BRAND ---- */
+  .brand {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .brand-logo {
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 4px;
+    letter-spacing: -1px;
+  }
+
+  .brand-logo .peru  { color: #f9c22b; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .brand-logo .globo { color: #4de88e; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .brand-logo .balloon { font-size: 28px; margin-right: 4px; }
+
+  .brand-sub {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.55);
+  }
+
+  /* separador coloreado tipo banderín */
+  .brand-divider {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin: 12px 0 0;
+  }
+  .brand-divider span {
+    width: 20px; height: 4px;
+    border-radius: 99px;
+  }
+
+  h1 {
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 5px;
+    color: #fff;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+
+  /* ---- GEO ---- */
+  #geo-screen {
+    text-align: center;
+    padding: 8px 0 20px;
+  }
+
+  .geo-spinner {
+    width: 58px; height: 58px;
+    border: 3px solid rgba(255,255,255,0.15);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .geo-icon {
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 20px;
+  }
+
+  .geo-icon.ok   { background: rgba(34,197,94,0.2);  border: 2px solid var(--success); }
+  .geo-icon.fail { background: rgba(239,68,68,0.2);  border: 2px solid var(--error); }
+  .geo-icon.warn { background: rgba(245,158,11,0.2); border: 2px solid var(--warning); }
+
+  .geo-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+  .geo-desc  { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; font-weight: 600; }
+
+  .distance-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .distance-badge.inside  { background: rgba(34,197,94,0.2);  border: 1px solid rgba(34,197,94,0.5);  color: #6effa0; }
+  .distance-badge.outside { background: rgba(239,68,68,0.2);  border: 1px solid rgba(239,68,68,0.5);  color: #ffa0a0; }
+
+  /* ---- FORM ---- */
+  #form-screen { display: none; }
+
+  .field { margin-bottom: 16px; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  input, select {
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 14px;
+    transition: all 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  input::placeholder { color: rgba(255,255,255,0.35); }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 0 0 3px rgba(249,194,43,0.2);
+  }
+
+  select option { background: #5a1a7a; color: #fff; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+    letter-spacing: 0.2px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #f9c22b, #f0a500);
+    color: #3d1a00;
+    box-shadow: 0 4px 20px rgba(249,194,43,0.4);
+  }
+
+  .btn-primary:hover  { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(249,194,43,0.5); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-ghost {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    border: 1.5px solid rgba(255,255,255,0.2);
+  }
+
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.5); color: #fff; background: rgba(255,255,255,0.13); }
+
+  .timestamp-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+
+  /* ---- SUCCESS ---- */
+  #success-screen {
+    display: none;
+    text-align: center;
+    padding: 12px 0;
+  }
+
+  .success-ring {
+    width: 76px; height: 76px;
+    background: rgba(34,197,94,0.15);
+    border: 2.5px solid var(--success);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px;
+    margin: 0 auto 20px;
+    animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .success-name { font-size: 20px; font-weight: 900; margin-bottom: 8px; }
+  .success-meta { font-size: 13px; color: var(--muted); line-height: 1.8; font-weight: 600; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    margin: 22px 0;
+  }
+
+  @media (max-width: 400px) {
+    .card { padding: 28px 20px; }
+    .row  { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- BRAND -->
+  <div class="brand">
+    <div class="brand-logo">
+      <span class="balloon">🎈</span><span class="peru">PERÚ</span> <span class="globo">GLOBO</span>
+    </div>
+    <div class="brand-sub">Control de asistencia</div>
+    <div class="brand-divider">
+      <span style="background:#f9c22b"></span>
+      <span style="background:#e63946"></span>
+      <span style="background:#4de88e"></span>
+      <span style="background:#4da8f9"></span>
+      <span style="background:#f9c22b"></span>
+    </div>
+  </div>
+
+  <!-- PANTALLA GEO -->
+  <div id="geo-screen">
+    <div class="geo-spinner" id="geo-spinner"></div>
+    <div class="geo-title" id="geo-title">Verificando ubicación…</div>
+    <div class="geo-desc" id="geo-desc">Estamos comprobando que te encuentras en las instalaciones. Por favor acepta el permiso de ubicación.</div>
+    <div id="geo-extra"></div>
+    <button class="btn btn-ghost" id="retry-btn" style="display:none" onclick="checkLocation()">🔄 Reintentar</button>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div id="form-screen">
+    <h1>Registrar asistencia</h1>
+    <p class="subtitle">Completa los datos para marcar tu ingreso o salida.</p>
+
+    <div class="timestamp-info">
+      📅 <span id="timestamp-display">—</span>
+    </div>
+
+    <div class="field">
+      <label>Nombre completo</label>
+      <input type="text" id="nombre" placeholder="Ej. Juan Pérez García" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label>DNI / Código de empleado</label>
+      <input type="text" id="dni" placeholder="Ej. 45678901" maxlength="12" autocomplete="off" />
+    </div>
+
+    <div class="field row">
+      <div>
+        <label>Área</label>
+        <select id="area">
+          <option value="">Seleccionar…</option>
+          <option>Administración</option>
+          <option>Operaciones</option>
+          <option>Almacén</option>
+          <option>Ventas</option>
+          <option>TI</option>
+          <option>RRHH</option>
+        </select>
+      </div>
+      <div>
+        <label>Tipo de registro</label>
+        <select id="tipo">
+          <option value="entrada">🟢 Entrada</option>
+          <option value="salida">🔴 Salida</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Observación (opcional)</label>
+      <input type="text" id="obs" placeholder="Ej. Llegada por permiso médico" />
+    </div>
+
+    <button class="btn btn-primary" id="submit-btn" onclick="submitForm()">Registrar asistencia 🎈</button>
+  </div>
+
+  <!-- ÉXITO -->
+  <div id="success-screen">
+    <div class="success-ring">✓</div>
+    <div class="success-name" id="s-nombre">—</div>
+    <div class="success-meta" id="s-meta">—</div>
+    <hr class="divider">
+    <div style="display:flex; gap:10px; margin-top:4px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="resetForm()">Registrar otro empleado</button>
+      <button class="btn btn-primary" style="flex:1" onclick="window.close()">Continuar →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  ⚙️  CONFIGURACIÓN — EDITA ESTOS VALORES
+// ══════════════════════════════════════════════
+const CONFIG = {
+  lat: -16.42885937556972,
+  lng: -71.55123131702841,
+  radioMetros: 50,
+  empresa: "Perú Globo",
+  scriptUrl: "https://script.google.com/macros/s/AKfycbw95c93RsPby2auMEB5zFMFvd69bmMkakbS_Bq-keYg1wb98N6h3_eoK_DOE1ENI8BQkg/exec",
+};
+// ══════════════════════════════════════════════
+
+function getTimestamp() {
+  return new Date().toLocaleString('es-PE', {
+    weekday: 'long', year: 'numeric', month: 'long',
+    day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+}
+d
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180;
+  const Δλ = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function setGeoState(type, title, desc, extra = '') {
+  document.getElementById('geo-spinner').style.display = 'none';
+  document.getElementById('geo-title').textContent = title;
+  document.getElementById('geo-desc').textContent = desc;
+  document.getElementById('geo-extra').innerHTML = extra;
+  const icons = { ok: '📍', fail: '❌', warn: '⚠️' };
+  const spinner = document.getElementById('geo-spinner');
+  spinner.outerHTML = `<div class="geo-icon ${type}">${icons[type]}</div>`;
+  document.getElementById('retry-btn').style.display = type === 'ok' ? 'none' : 'block';
+}
+
+function checkLocation() {
+  const icon = document.querySelector('.geo-icon');
+  if (icon) icon.outerHTML = `<div class="geo-spinner" id="geo-spinner"></div>`;
+  document.getElementById('geo-title').textContent = 'Verificando ubicación…';
+  document.getElementById('geo-desc').textContent = 'Estamos comprobando que te encuentras en las instalaciones.';
+  document.getElementById('geo-extra').innerHTML = '';
+  document.getElementById('retry-btn').style.display = 'none';
+
+  if (!navigator.geolocation) {
+    setGeoState('fail', 'Geolocalización no soportada', 'Tu navegador no soporta geolocalización. Usa Chrome o Safari en un dispositivo con GPS.');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords;
+      const dist = haversine(CONFIG.lat, CONFIG.lng, latitude, longitude);
+      const distText = dist < 1000 ? `${Math.round(dist)} m` : `${(dist/1000).toFixed(1)} km`;
+
+      if (dist <= CONFIG.radioMetros) {
+        setGeoState('ok', '¡Ubicación verificada!',
+          `Estás dentro del área permitida de ${CONFIG.empresa}.`,
+          `<div class="distance-badge inside">📍 A ${distText} de la empresa</div>`);
+        setTimeout(() => {
+          document.getElementById('geo-screen').style.display = 'none';
+          document.getElementById('form-screen').style.display = 'block';
+          document.getElementById('timestamp-display').textContent = getTimestamp();
+        }, 1400);
+      } else {
+        setGeoState('fail', 'Fuera del área de la empresa',
+          `Debes estar dentro de ${CONFIG.radioMetros} m de las instalaciones para registrar tu asistencia.`,
+          `<div class="distance-badge outside">📍 Estás a ${distText} del centro</div>`);
+      }
+    },
+    (err) => {
+      const msgs = {
+        1: 'Permiso de ubicación denegado. Ve a ajustes de tu navegador y permite el acceso.',
+        2: 'No se pudo obtener tu ubicación. Asegúrate de tener el GPS activo.',
+        3: 'La solicitud tardó demasiado. Intenta en un lugar con mejor señal.',
+      };
+      setGeoState('warn', 'Error de ubicación', msgs[err.code] || 'Error desconocido.');
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+  );
+}
+
+function submitForm() {
+  const nombre = document.getElementById('nombre').value.trim();
+  const dni    = document.getElementById('dni').value.trim();
+  const area   = document.getElementById('area').value;
+  const tipo   = document.getElementById('tipo').value;
+  const obs    = document.getElementById('obs').value.trim();
+
+  if (!nombre || !dni || !area) {
+    alert('Por favor completa nombre, DNI y área.');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+
+  const payload = { nombre, dni, area, tipo, obs, timestamp: new Date().toISOString() };
+
+  fetch(CONFIG.scriptUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    document.getElementById('form-screen').style.display = 'none';
+    const ss = document.getElementById('success-screen');
+    ss.style.display = 'block';
+    document.getElementById('s-nombre').textContent = nombre;
+    document.getElementById('s-meta').innerHTML =
+      `${tipo === 'entrada' ? '🟢 Entrada' : '🔴 Salida'} registrada correctamente<br>
+       📋 ${area} &nbsp;·&nbsp; DNI ${dni}<br>
+       🕐 ${getTimestamp()}${obs ? '<br>📝 ' + obs : ''}`;
+    btn.disabled = false;
+    btn.textContent = 'Registrar asistencia 🎈';
+  })
+  .catch(() => {
+    alert('Error al guardar. Revisa tu conexión e intenta de nuevo.');
+    btn.disabled = false;
+    btn.textContent = 'Registrar asistencia 🎈';
+  });
+}
+
+function resetForm() {
+  document.getElementById('success-screen').style.display = 'none';
+  document.getElementById('form-screen').style.display = 'block';
+  document.getElementById('nombre').value = '';
+  document.getElementById('dni').value = '';
+  document.getElementById('area').value = '';
+  document.getElementById('obs').value = '';
+  document.getElementById('timestamp-display').textContent = getTimestamp();
+}
+
+checkLocation();
+</script>
+</body>
+</html>
