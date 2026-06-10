@@ -313,7 +313,7 @@
 
   <!-- PANTALLA GEO -->
   <div id="geo-screen">
-    <div class="geo-spinner" id="geo-spinner"></div>
+    <div id="geo-indicator"><div class="geo-spinner"></div></div>
     <div class="geo-title" id="geo-title">Verificando ubicación…</div>
     <div class="geo-desc" id="geo-desc">Estamos comprobando que te encuentras en las instalaciones. Por favor acepta el permiso de ubicación.</div>
     <div id="geo-extra"></div>
@@ -388,9 +388,9 @@
 //  ⚙️  CONFIGURACIÓN — EDITA ESTOS VALORES
 // ══════════════════════════════════════════════
 const CONFIG = {
-  lat: -16.42885937556972,
-  lng: -71.55123131702841,
-  radioMetros: 50,
+  lat: -16.428861627081186,
+  lng: -16.428861627081186,
+  radioMetros: 30,
   empresa: "Perú Globo",
   scriptUrl: "https://script.google.com/macros/s/AKfycbw95c93RsPby2auMEB5zFMFvd69bmMkakbS_Bq-keYg1wb98N6h3_eoK_DOE1ENI8BQkg/exec",
 };
@@ -402,7 +402,7 @@ function getTimestamp() {
     day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
   });
 }
-d
+
 function haversine(lat1, lng1, lat2, lng2) {
   const R = 6371000;
   const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
@@ -413,19 +413,17 @@ function haversine(lat1, lng1, lat2, lng2) {
 }
 
 function setGeoState(type, title, desc, extra = '') {
-  document.getElementById('geo-spinner').style.display = 'none';
+  const icons = { ok: '📍', fail: '❌', warn: '⚠️' };
+  document.getElementById('geo-indicator').innerHTML =
+    `<div class="geo-icon ${type}">${icons[type]}</div>`;
   document.getElementById('geo-title').textContent = title;
   document.getElementById('geo-desc').textContent = desc;
   document.getElementById('geo-extra').innerHTML = extra;
-  const icons = { ok: '📍', fail: '❌', warn: '⚠️' };
-  const spinner = document.getElementById('geo-spinner');
-  spinner.outerHTML = `<div class="geo-icon ${type}">${icons[type]}</div>`;
   document.getElementById('retry-btn').style.display = type === 'ok' ? 'none' : 'block';
 }
 
 function checkLocation() {
-  const icon = document.querySelector('.geo-icon');
-  if (icon) icon.outerHTML = `<div class="geo-spinner" id="geo-spinner"></div>`;
+  document.getElementById('geo-indicator').innerHTML = '<div class="geo-spinner"></div>';
   document.getElementById('geo-title').textContent = 'Verificando ubicación…';
   document.getElementById('geo-desc').textContent = 'Estamos comprobando que te encuentras en las instalaciones.';
   document.getElementById('geo-extra').innerHTML = '';
